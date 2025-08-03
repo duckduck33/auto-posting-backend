@@ -272,8 +272,26 @@ def upload_to_naver_blog(title: str, content: str) -> dict:
                 chrome_options.add_argument("--disable-gpu")
                 chrome_options.add_argument("--window-size=1920,1080")
                 chrome_options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                chrome_options.add_argument("--disable-extensions")
+                chrome_options.add_argument("--disable-plugins")
+                chrome_options.add_argument("--disable-images")
                 
-                service = Service(ChromeDriverManager().install())
+                # ChromeDriver 직접 설치
+                import subprocess
+                import os
+                
+                # ChromeDriver 다운로드 및 설치
+                chromedriver_path = "/usr/local/bin/chromedriver"
+                if not os.path.exists(chromedriver_path):
+                    subprocess.run([
+                        "wget", "-O", "/tmp/chromedriver.zip",
+                        "https://chromedriver.storage.googleapis.com/138.0.7204.183/chromedriver_linux64.zip"
+                    ])
+                    subprocess.run(["unzip", "/tmp/chromedriver.zip", "-d", "/tmp"])
+                    subprocess.run(["mv", "/tmp/chromedriver", chromedriver_path])
+                    subprocess.run(["chmod", "+x", chromedriver_path])
+                
+                service = Service(chromedriver_path)
                 driver = webdriver.Chrome(service=service, options=chrome_options)
                 print("✅ Chrome 드라이버 설정 완료")
             except Exception as e:
@@ -293,21 +311,25 @@ def upload_to_naver_blog(title: str, content: str) -> dict:
             driver.get('https://nid.naver.com/nidlogin.login')
             time.sleep(5)  # 대기 시간 증가
         
-            # 복사-붙여넣기 로그인
+            # 직접 입력 방식으로 로그인 (헤드리스 환경 대응)
             id_field = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "id")))
             id_field.click()
             id_field.clear()
             time.sleep(2)
-            pyperclip.copy(naver_info['id'])
-            id_field.send_keys(Keys.CONTROL + 'v')
+            # 직접 입력
+            for char in naver_info['id']:
+                id_field.send_keys(char)
+                time.sleep(0.1)
             time.sleep(3)
             
             pw_field = WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "pw")))
             pw_field.click()
             pw_field.clear()
             time.sleep(2)
-            pyperclip.copy(naver_info['pw'])
-            pw_field.send_keys(Keys.CONTROL + 'v')
+            # 직접 입력
+            for char in naver_info['pw']:
+                pw_field.send_keys(char)
+                time.sleep(0.1)
             time.sleep(3)
             
             login_button = WebDriverWait(driver, 10).until(EC.element_to_be_clickable((By.ID, "log.login")))
