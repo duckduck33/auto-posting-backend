@@ -18,10 +18,33 @@ from dotenv import load_dotenv
 def load_prompts():
     """prompt.json 파일에서 프롬프트를 로드하는 함수"""
     try:
-        prompt_path = os.path.join(os.path.dirname(__file__), 'prompt.json')
-        with open(prompt_path, 'r', encoding='utf-8') as f:
-            prompts = json.load(f)
-        return prompts
+        # 여러 경로에서 파일 찾기 시도
+        possible_paths = [
+            os.path.join(os.path.dirname(__file__), 'prompt.json'),
+            'prompt.json',
+            '/app/prompt.json'
+        ]
+        
+        for prompt_path in possible_paths:
+            if os.path.exists(prompt_path):
+                print(f"prompt.json 파일을 찾았습니다: {prompt_path}")
+                with open(prompt_path, 'r', encoding='utf-8') as f:
+                    prompts = json.load(f)
+                return prompts
+        
+        print("prompt.json 파일을 찾을 수 없습니다. 기본 프롬프트를 사용합니다.")
+        # 기본 프롬프트 반환
+        return {
+            "titlePrompt": {
+                "content": "다음 키워드를 사용하여 SEO에 최적화된 블로그 제목을 생성해주세요: \"${keyword}\"\n\n제목은 다음 조건을 만족해야 합니다:\n1. 상위 키워드와 하위 키워드로 구성되어야 합니다.\n2. SEO 관점에서 검색 노출이 높은 키워드를 포함해야 합니다.\n3. 제목 길이는 50자 이내로 작성해주세요."
+            },
+            "contentPrompt": {
+                "content": "다음 제목을 바탕으로 블로그 포스트의 본문을 작성해주세요:\n\n제목: \"${title}\"\n필수 키워드: \"${keyword}\"\n\n본문은 다음 조건을 만족해야 합니다:\n1. 마크다운 형식으로 작성해주세요.\n2. 글자 수는 공백 포함 1500자에서 2500자 사이어야 합니다.\n3. SEO를 고려하여 관련 키워드를 자연스럽게 포함해야 합니다.\n4. 읽기 쉽고 정보가 풍부해야 합니다.\n5. 적절한 헤딩과 섹션을 포함해야 합니다."
+            },
+            "tagsPrompt": {
+                "content": "다음 제목을 바탕으로 블로그 포스트에 적합한 태그를 생성해주세요:\n\n제목: \"${title}\"\n\n태그는 다음 조건을 만족해야 합니다:\n1. 각 태그 앞에 #을 붙여주세요.\n2. 태그들을 공백으로 구분하여 한 줄로 작성해주세요.\n3. 5-8개의 태그를 생성해주세요.\n4. SEO를 고려하여 관련성 높은 키워드를 사용해주세요."
+            }
+        }
     except Exception as e:
         print(f"prompt.json 파일 로드 중 오류 발생: {e}")
         return None
@@ -34,18 +57,26 @@ class GeminiContentGenerator:
         Args:
             api_key: Gemini API 키. None이면 환경변수에서 가져옴
         """
-        # API 키 하드코딩
-        self.api_key = api_key or "AIzaSyBvNTKAbH0XaL1qaDJkH7JD39nvcjKSdyM"
-        
-        # Gemini API 설정
-        genai.configure(api_key=self.api_key)
-        
-        # 모델 초기화
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
-        self.prompts = load_prompts()
-        
-        if not self.prompts:
-            raise ValueError("prompt.json 파일을 로드할 수 없습니다.")
+        try:
+            # API 키 하드코딩
+            self.api_key = api_key or "AIzaSyBvNTKAbH0XaL1qaDJkH7JD39nvcjKSdyM"
+            
+            # Gemini API 설정
+            genai.configure(api_key=self.api_key)
+            
+            # 모델 초기화
+            self.model = genai.GenerativeModel('gemini-1.5-flash')
+            self.prompts = load_prompts()
+            
+            if not self.prompts:
+                print("⚠️ 프롬프트 로드 실패, 기본 프롬프트 사용")
+                raise ValueError("프롬프트를 로드할 수 없습니다.")
+                
+            print("✅ GeminiContentGenerator 초기화 완료")
+            
+        except Exception as e:
+            print(f"❌ GeminiContentGenerator 초기화 실패: {e}")
+            raise e
     
     def generate_title(self, keyword: str) -> str:
         """
