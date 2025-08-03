@@ -12,19 +12,11 @@ RUN apt-get update && apt-get install -y \
     && apt-get install -y google-chrome-stable \
     && rm -rf /var/lib/apt/lists/*
 
-# ChromeDriver 설치 (Chrome 버전에 맞춤)
+# ChromeDriver 설치 (안정적인 버전 사용)
 RUN echo "=== Chrome 설치 확인 ===" \
     && google-chrome --version \
-    && echo "=== Chrome 버전 파싱 ===" \
-    && CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | awk -F'.' '{print $1}') \
-    && echo "Chrome version: $CHROME_VERSION" \
-    && echo "=== ChromeDriver 버전 확인 ===" \
-    && wget -q "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION" -O /tmp/chromedriver_version \
-    && cat /tmp/chromedriver_version \
-    && CHROMEDRIVER_VERSION=$(cat /tmp/chromedriver_version) \
-    && echo "ChromeDriver version: $CHROMEDRIVER_VERSION" \
-    && echo "=== ChromeDriver 다운로드 ===" \
-    && wget -q "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip" -O /tmp/chromedriver.zip \
+    && echo "=== 안정적인 ChromeDriver 버전 사용 ===" \
+    && wget -q "https://chromedriver.storage.googleapis.com/120.0.6099.109/chromedriver_linux64.zip" -O /tmp/chromedriver.zip \
     && ls -la /tmp/chromedriver.zip \
     && echo "=== ChromeDriver 압축 해제 ===" \
     && unzip /tmp/chromedriver.zip -d /tmp/ \
