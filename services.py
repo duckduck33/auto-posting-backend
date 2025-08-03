@@ -283,12 +283,13 @@ def upload_to_naver_blog(title: str, content: str) -> dict:
                 # ChromeDriver 다운로드 및 설치
                 chromedriver_path = "/usr/local/bin/chromedriver"
                 if not os.path.exists(chromedriver_path):
+                    # 최신 ChromeDriver URL 사용
                     subprocess.run([
                         "wget", "-O", "/tmp/chromedriver.zip",
-                        "https://chromedriver.storage.googleapis.com/138.0.7204.183/chromedriver_linux64.zip"
+                        "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/138.0.7204.183/linux64/chromedriver-linux64.zip"
                     ])
                     subprocess.run(["unzip", "/tmp/chromedriver.zip", "-d", "/tmp"])
-                    subprocess.run(["mv", "/tmp/chromedriver", chromedriver_path])
+                    subprocess.run(["mv", "/tmp/chromedriver-linux64/chromedriver", chromedriver_path])
                     subprocess.run(["chmod", "+x", chromedriver_path])
                 
                 service = Service(chromedriver_path)
