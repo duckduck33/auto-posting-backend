@@ -265,12 +265,25 @@ def upload_to_naver_blog(title: str, content: str) -> dict:
             chrome_options.add_experimental_option('useAutomationExtension', False)
             
             try:
+                # 레일웨이 환경에 맞는 Chrome 옵션 추가
+                chrome_options.add_argument("--headless")  # 헤드리스 모드
+                chrome_options.add_argument("--no-sandbox")
+                chrome_options.add_argument("--disable-dev-shm-usage")
+                chrome_options.add_argument("--disable-gpu")
+                chrome_options.add_argument("--window-size=1920,1080")
+                chrome_options.add_argument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+                
                 service = Service(ChromeDriverManager().install())
                 driver = webdriver.Chrome(service=service, options=chrome_options)
                 print("✅ Chrome 드라이버 설정 완료")
             except Exception as e:
                 print(f"ChromeDriverManager 오류: {e}")
-                driver = webdriver.Chrome(options=chrome_options)
+                # 대체 방법으로 시도
+                try:
+                    driver = webdriver.Chrome(options=chrome_options)
+                except Exception as e2:
+                    print(f"Chrome 드라이버 초기화 실패: {e2}")
+                    raise e2
         
             driver.maximize_window()
             
