@@ -276,23 +276,10 @@ def upload_to_naver_blog(title: str, content: str) -> dict:
                 chrome_options.add_argument("--disable-plugins")
                 chrome_options.add_argument("--disable-images")
                 
-                # ChromeDriver 직접 설치
-                import subprocess
-                import os
+                # webdriver-manager 사용 (더 안정적)
+                from webdriver_manager.chrome import ChromeDriverManager
                 
-                # ChromeDriver 다운로드 및 설치
-                chromedriver_path = "/usr/local/bin/chromedriver"
-                if not os.path.exists(chromedriver_path):
-                    # 최신 ChromeDriver URL 사용
-                    subprocess.run([
-                        "wget", "-O", "/tmp/chromedriver.zip",
-                        "https://edgedl.me.gvt1.com/edgedl/chrome/chrome-for-testing/138.0.7204.183/linux64/chromedriver-linux64.zip"
-                    ])
-                    subprocess.run(["unzip", "/tmp/chromedriver.zip", "-d", "/tmp"])
-                    subprocess.run(["mv", "/tmp/chromedriver-linux64/chromedriver", chromedriver_path])
-                    subprocess.run(["chmod", "+x", chromedriver_path])
-                
-                service = Service(chromedriver_path)
+                service = Service(ChromeDriverManager().install())
                 driver = webdriver.Chrome(service=service, options=chrome_options)
                 print("✅ Chrome 드라이버 설정 완료")
             except Exception as e:
