@@ -306,42 +306,22 @@ def upload_to_naver_blog(title: str, content: str) -> dict:
                 chrome_options.add_argument("--disable-plugins")
                 chrome_options.add_argument("--disable-images")
                 
-                # Docker에서 설치한 ChromeDriver 사용 (Railway 환경 최적화)
-                import subprocess
-                import os
+                # webdriver-manager 사용 (Railway 환경 최적화)
+                from webdriver_manager.chrome import ChromeDriverManager
                 
-                # ChromeDriver 경로 확인
-                chromedriver_paths = [
-                    "/usr/local/bin/chromedriver",
-                    "/usr/bin/chromedriver",
-                    "chromedriver"
-                ]
-                
-                print("🔍 ChromeDriver 경로 확인 중...")
-                chromedriver_path = None
-                for path in chromedriver_paths:
-                    try:
-                        print(f"🔍 경로 확인: {path}")
-                        result = subprocess.run([path, "--version"], capture_output=True, text=True)
-                        if result.returncode == 0:
-                            chromedriver_path = path
-                            print(f"✅ ChromeDriver 발견: {path}")
-                            print(f"✅ ChromeDriver 버전: {result.stdout.strip()}")
-                            break
-                        else:
-                            print(f"❌ 경로 실패: {path} (return code: {result.returncode})")
-                    except Exception as e:
-                        print(f"❌ 경로 예외: {path} - {e}")
-                        continue
-                
-                if chromedriver_path:
-                    service = Service(chromedriver_path)
+                try:
+                    service = Service(ChromeDriverManager().install())
                     driver = webdriver.Chrome(service=service, options=chrome_options)
-                    print("✅ Chrome 드라이버 설정 완료")
-                else:
-                    print("⚠️ ChromeDriver를 찾을 수 없습니다. 시스템 PATH에서 찾습니다.")
-                    driver = webdriver.Chrome(options=chrome_options)
-                    print("✅ Chrome 드라이버 설정 완료 (시스템 PATH 사용)")
+                    print("✅ Chrome 드라이버 설정 완료 (webdriver-manager)")
+                except Exception as e:
+                    print(f"webdriver-manager 오류: {e}")
+                    # 대체 방법으로 시도
+                    try:
+                        driver = webdriver.Chrome(options=chrome_options)
+                        print("✅ Chrome 드라이버 설정 완료 (시스템 PATH)")
+                    except Exception as e2:
+                        print(f"Chrome 드라이버 초기화 실패: {e2}")
+                        raise e2
             except Exception as e:
                 print(f"ChromeDriver 오류: {e}")
                 # 대체 방법으로 시도

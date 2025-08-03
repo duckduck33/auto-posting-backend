@@ -12,23 +12,8 @@ RUN apt-get update && apt-get install -y \
     && apt-get install -y google-chrome-stable \
     && rm -rf /var/lib/apt/lists/*
 
-# ChromeDriver 설치 (안정적인 버전 사용)
-RUN echo "=== Chrome 설치 확인 ===" \
-    && google-chrome --version \
-    && echo "=== 안정적인 ChromeDriver 버전 사용 ===" \
-    && wget -q "https://chromedriver.storage.googleapis.com/120.0.6099.109/chromedriver_linux64.zip" -O /tmp/chromedriver.zip \
-    && ls -la /tmp/chromedriver.zip \
-    && echo "=== ChromeDriver 압축 해제 ===" \
-    && unzip /tmp/chromedriver.zip -d /tmp/ \
-    && ls -la /tmp/ \
-    && echo "=== ChromeDriver 설치 ===" \
-    && mv /tmp/chromedriver /usr/local/bin/ \
-    && ls -la /usr/local/bin/chromedriver \
-    && chmod +x /usr/local/bin/chromedriver \
-    && echo "=== ChromeDriver 테스트 ===" \
-    && /usr/local/bin/chromedriver --version \
-    && rm -rf /tmp/chromedriver* \
-    && echo "ChromeDriver 설치 완료: $(which chromedriver)"
+# ChromeDriver 설치 (webdriver-manager 사용)
+RUN pip install webdriver-manager
 
 # 작업 디렉토리 설정
 WORKDIR /app
