@@ -5,7 +5,6 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.service import Service
-from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
@@ -276,14 +275,12 @@ def upload_to_naver_blog(title: str, content: str) -> dict:
                 chrome_options.add_argument("--disable-plugins")
                 chrome_options.add_argument("--disable-images")
                 
-                # webdriver-manager 사용 (더 안정적)
-                from webdriver_manager.chrome import ChromeDriverManager
-                
-                service = Service(ChromeDriverManager().install())
+                # Docker에서 설치한 ChromeDriver 사용
+                service = Service("/usr/local/bin/chromedriver")
                 driver = webdriver.Chrome(service=service, options=chrome_options)
                 print("✅ Chrome 드라이버 설정 완료")
             except Exception as e:
-                print(f"ChromeDriverManager 오류: {e}")
+                print(f"ChromeDriver 오류: {e}")
                 # 대체 방법으로 시도
                 try:
                     driver = webdriver.Chrome(options=chrome_options)
