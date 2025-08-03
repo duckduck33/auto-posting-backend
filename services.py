@@ -306,22 +306,10 @@ def upload_to_naver_blog(title: str, content: str) -> dict:
                 chrome_options.add_argument("--disable-plugins")
                 chrome_options.add_argument("--disable-images")
                 
-                # webdriver-manager 사용 (Railway 환경 최적화)
-                from webdriver_manager.chrome import ChromeDriverManager
-                
-                try:
-                    service = Service(ChromeDriverManager().install())
-                    driver = webdriver.Chrome(service=service, options=chrome_options)
-                    print("✅ Chrome 드라이버 설정 완료 (webdriver-manager)")
-                except Exception as e:
-                    print(f"webdriver-manager 오류: {e}")
-                    # 대체 방법으로 시도
-                    try:
-                        driver = webdriver.Chrome(options=chrome_options)
-                        print("✅ Chrome 드라이버 설정 완료 (시스템 PATH)")
-                    except Exception as e2:
-                        print(f"Chrome 드라이버 초기화 실패: {e2}")
-                        raise e2
+                # 직접 ChromeDriver 사용 (안정적인 버전)
+                service = Service("/usr/local/bin/chromedriver")
+                driver = webdriver.Chrome(service=service, options=chrome_options)
+                print("✅ Chrome 드라이버 설정 완료 (직접 경로)")
             except Exception as e:
                 print(f"ChromeDriver 오류: {e}")
                 # 대체 방법으로 시도

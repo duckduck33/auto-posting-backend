@@ -210,16 +210,25 @@ async def generate_post_process(keyword: str):
         automation_state["step_description"] = f"AI 모델 초기화 중... (키워드: {keyword})"
         current_generating_content = f"AI 모델 초기화 중... (키워드: {keyword})"
         
-        # Gemini 콘텐츠 생성기 초기화
+        # Gemini 콘텐츠 생성기 초기화 (타임아웃 설정)
         try:
-            generator = GeminiContentGenerator()
+            # 비동기로 초기화하여 타임아웃 방지
+            generator = await asyncio.wait_for(
+                asyncio.create_task(asyncio.to_thread(GeminiContentGenerator)),
+                timeout=30.0  # 30초 타임아웃
+            )
+        except asyncio.TimeoutError:
+            error_msg = "AI 모델 초기화 타임아웃 (30초 초과)"
+            print(f"❌ {error_msg}")
+            add_to_logs(f"❌ {error_msg}")
+            raise Exception(error_msg)
         except Exception as e:
             error_msg = f"AI 모델 초기화 실패: {str(e)}"
             print(f"❌ {error_msg}")
             add_to_logs(f"❌ {error_msg}")
             raise e
         
-        await asyncio.sleep(2)
+        await asyncio.sleep(1)  # 대기 시간 단축
         print(f"✅ 1단계: AI 모델 초기화 완료 (키워드: {keyword})")
         add_to_logs(f"✅ 1단계: AI 모델 초기화 완료 (키워드: {keyword})")
         
