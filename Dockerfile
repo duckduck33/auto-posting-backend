@@ -13,15 +13,28 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # ChromeDriver 설치 (Chrome 버전에 맞춤)
-RUN CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | awk -F'.' '{print $1}') \
+RUN echo "=== Chrome 설치 확인 ===" \
+    && google-chrome --version \
+    && echo "=== Chrome 버전 파싱 ===" \
+    && CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | awk -F'.' '{print $1}') \
     && echo "Chrome version: $CHROME_VERSION" \
+    && echo "=== ChromeDriver 버전 확인 ===" \
     && wget -q "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION" -O /tmp/chromedriver_version \
+    && cat /tmp/chromedriver_version \
     && CHROMEDRIVER_VERSION=$(cat /tmp/chromedriver_version) \
     && echo "ChromeDriver version: $CHROMEDRIVER_VERSION" \
+    && echo "=== ChromeDriver 다운로드 ===" \
     && wget -q "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip" -O /tmp/chromedriver.zip \
+    && ls -la /tmp/chromedriver.zip \
+    && echo "=== ChromeDriver 압축 해제 ===" \
     && unzip /tmp/chromedriver.zip -d /tmp/ \
+    && ls -la /tmp/ \
+    && echo "=== ChromeDriver 설치 ===" \
     && mv /tmp/chromedriver /usr/local/bin/ \
+    && ls -la /usr/local/bin/chromedriver \
     && chmod +x /usr/local/bin/chromedriver \
+    && echo "=== ChromeDriver 테스트 ===" \
+    && /usr/local/bin/chromedriver --version \
     && rm -rf /tmp/chromedriver* \
     && echo "ChromeDriver 설치 완료: $(which chromedriver)"
 

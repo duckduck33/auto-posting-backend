@@ -317,15 +317,21 @@ def upload_to_naver_blog(title: str, content: str) -> dict:
                     "chromedriver"
                 ]
                 
+                print("🔍 ChromeDriver 경로 확인 중...")
                 chromedriver_path = None
                 for path in chromedriver_paths:
                     try:
+                        print(f"🔍 경로 확인: {path}")
                         result = subprocess.run([path, "--version"], capture_output=True, text=True)
                         if result.returncode == 0:
                             chromedriver_path = path
                             print(f"✅ ChromeDriver 발견: {path}")
+                            print(f"✅ ChromeDriver 버전: {result.stdout.strip()}")
                             break
-                    except:
+                        else:
+                            print(f"❌ 경로 실패: {path} (return code: {result.returncode})")
+                    except Exception as e:
+                        print(f"❌ 경로 예외: {path} - {e}")
                         continue
                 
                 if chromedriver_path:
