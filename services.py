@@ -306,10 +306,36 @@ def upload_to_naver_blog(title: str, content: str) -> dict:
                 chrome_options.add_argument("--disable-plugins")
                 chrome_options.add_argument("--disable-images")
                 
-                # Docker에서 설치한 ChromeDriver 사용
-                service = Service("/usr/local/bin/chromedriver")
-                driver = webdriver.Chrome(service=service, options=chrome_options)
-                print("✅ Chrome 드라이버 설정 완료")
+                # Docker에서 설치한 ChromeDriver 사용 (Railway 환경 최적화)
+                import subprocess
+                import os
+                
+                # ChromeDriver 경로 확인
+                chromedriver_paths = [
+                    "/usr/local/bin/chromedriver",
+                    "/usr/bin/chromedriver",
+                    "chromedriver"
+                ]
+                
+                chromedriver_path = None
+                for path in chromedriver_paths:
+                    try:
+                        result = subprocess.run([path, "--version"], capture_output=True, text=True)
+                        if result.returncode == 0:
+                            chromedriver_path = path
+                            print(f"✅ ChromeDriver 발견: {path}")
+                            break
+                    except:
+                        continue
+                
+                if chromedriver_path:
+                    service = Service(chromedriver_path)
+                    driver = webdriver.Chrome(service=service, options=chrome_options)
+                    print("✅ Chrome 드라이버 설정 완료")
+                else:
+                    print("⚠️ ChromeDriver를 찾을 수 없습니다. 시스템 PATH에서 찾습니다.")
+                    driver = webdriver.Chrome(options=chrome_options)
+                    print("✅ Chrome 드라이버 설정 완료 (시스템 PATH 사용)")
             except Exception as e:
                 print(f"ChromeDriver 오류: {e}")
                 # 대체 방법으로 시도
