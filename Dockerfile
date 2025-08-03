@@ -8,18 +8,21 @@ RUN apt-get update && apt-get install -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
-# 안정적인 Chrome 버전 설치 (115.0.5790.170)
-RUN echo "=== Installing Google Chrome 115.0.5790.170 ===" \
+# Chrome 설치 (최신 안정 버전)
+RUN echo "=== Installing Google Chrome ===" \
     && wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add - \
     && echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google-chrome.list \
     && apt-get update \
-    && apt-get install -y google-chrome-stable=115.0.5790.170-1 \
+    && apt-get install -y google-chrome-stable \
     && echo "Google Chrome version: $(google-chrome --version)"
 
-# ChromeDriver 설치 (Chrome 115.0.5790.170에 맞춤)
-RUN echo "=== ChromeDriver Installation for Chrome 115.0.5790.170 ===" \
-    && CHROMEDRIVER_VERSION="115.0.5790.170" \
-    && echo "Downloading ChromeDriver version: $CHROMEDRIVER_VERSION" \
+# ChromeDriver 설치 (Chrome 버전에 맞춤)
+RUN echo "=== ChromeDriver Installation ===" \
+    && CHROME_VERSION=$(google-chrome --version | awk '{print $3}' | awk -F'.' '{print $1}') \
+    && echo "Chrome version: $CHROME_VERSION" \
+    && wget -q "https://chromedriver.storage.googleapis.com/LATEST_RELEASE_$CHROME_VERSION" -O /tmp/chromedriver_version \
+    && CHROMEDRIVER_VERSION=$(cat /tmp/chromedriver_version) \
+    && echo "ChromeDriver version: $CHROMEDRIVER_VERSION" \
     && wget -q "https://chromedriver.storage.googleapis.com/$CHROMEDRIVER_VERSION/chromedriver_linux64.zip" -O /tmp/chromedriver.zip \
     && ls -la /tmp/chromedriver.zip \
     && echo "Unzipping ChromeDriver..." \
